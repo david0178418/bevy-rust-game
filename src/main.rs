@@ -10,11 +10,11 @@ use bevy::{
 		WindowTheme,
 	}
 };
+use rand::random;
 
 fn main() {
     App::new()
         .insert_resource(ClearColor(Color::rgb(0.2, 0.2, 0.2)))
-        // .add_plugins(DefaultPlugins)
 		.add_plugins((
             DefaultPlugins.set(WindowPlugin {
                 primary_window: Some(Window {
@@ -41,13 +41,13 @@ fn main() {
             // LogDiagnosticsPlugin::default(),
             // FrameTimeDiagnosticsPlugin,
         ))
+		.add_systems(Startup, setup)
 		.add_systems(Update, (
 			bevy::window::close_on_esc,
 			make_visible,
 			apply_player_control,
 			process_self_destruct_on_timer,
 		))
-		.add_systems(Startup, setup)
 		.add_systems(FixedUpdate, (
 			update_timer,
 			process_fire_rate,
@@ -176,6 +176,7 @@ fn apply_player_control(
 	mut query: Query<(
 		&mut Acceleration,
 		&mut FireRate,
+		&Velocity,
 		&Position,
 		&PlayerControlled,
 	)>,
@@ -183,6 +184,7 @@ fn apply_player_control(
 	for (
 		mut accel,
 		mut fire_rate,
+		velocity,
 		position,
 		player_controlled
 	) in query.iter_mut() {
@@ -210,17 +212,23 @@ fn apply_player_control(
 			fire_rate.remaining_ms = fire_rate.ms_delay;
 			let bullet_position = position.vector;
 
+			let velocity_variable = (random::<f32>() * 200.0) - 100.0;
+			let vertical_vector_variable = (random::<f32>() * 250.0) - 125.0;
+
 			commands.spawn(
 				BulletBundle {
 					self_destruct_on_timer: SelfDestructOnTimer,
 					velocity: Velocity {
-						vector: vec2(500.0, 0.0),
+						vector: vec2(
+							750.0 + velocity.vector.x + velocity_variable,
+							vertical_vector_variable
+						),
 					},
 					position: Position {
 						vector: bullet_position,
 					},
 					lifetime: Alarm {
-						remaining_ms: 500.0,
+						remaining_ms: 400.0,
 					},
 					sprite_bundle: SpriteBundle {
 						transform: Transform {
