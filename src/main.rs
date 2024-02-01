@@ -1,14 +1,14 @@
 use bevy::{
+	prelude::*,
 	core::FrameCount,
-    prelude::*,
 	math::{
 		vec2,
 		vec3,
 	},
-    window::{
+	window::{
 		PresentMode,
-		WindowTheme
-	},
+		WindowTheme,
+	}
 };
 
 fn main() {
@@ -45,12 +45,16 @@ fn main() {
 			bevy::window::close_on_esc,
 			make_visible,
 			apply_player_control,
+			process_self_destruct_on_timer,
 		))
 		.add_systems(Startup, setup)
 		.add_systems(FixedUpdate, (
+			update_timer,
+			process_fire_rate,
 			apply_acceleration,
 			apply_velocity,
 			apply_drag,
+			update_moving_sprites,
 		))
         .run();
 }
@@ -81,22 +85,53 @@ struct Velocity  {
 }
 
 #[derive(Component)]
+struct Position  {
+	vector: Vec2,
+}
+
+#[derive(Component)]
 struct Drag {
 	value: f32,
 }
+
+#[derive(Component)]
+struct FireRate {
+	remaining_ms: f32,
+	ms_delay: f32,
+}
+
+#[derive(Component)]
+struct Alarm {
+	remaining_ms: f32,
+}
+
+#[derive(Component)]
+struct SelfDestructOnTimer;
 
 #[derive(Bundle)]
 struct PlayerBundle {
 	acceleration: Acceleration,
 	velocity: Velocity,
+	position: Position,
+	fire_rate: FireRate,
 	drag: Drag,
 	player_controlled: PlayerControlled,
+	sprite_bundle: SpriteBundle,
+}
+
+#[derive(Bundle)]
+struct BulletBundle {
+	velocity: Velocity,
+	position: Position,
+	self_destruct_on_timer: SelfDestructOnTimer,
+	lifetime: Alarm,
 	sprite_bundle: SpriteBundle,
 }
 
 fn setup(mut commands: Commands) {
 	commands.spawn(Camera2dBundle::default());
 
+	let position = vec2(0.0, 0.0);
 	// Spawn player
 	commands.spawn(
 		PlayerBundle {
@@ -106,15 +141,22 @@ fn setup(mut commands: Commands) {
 			velocity: Velocity {
 				vector: vec2(0.0, 0.0),
 			},
+			position: Position {
+				vector: position,
+			},
 			drag: Drag {
 				value: 3.0,
+			},
+			fire_rate: FireRate {
+				remaining_ms: 0.0,
+				ms_delay: 100.0,
 			},
 			player_controlled: PlayerControlled {
 				speed: 1300.0,
 			},
 			sprite_bundle: SpriteBundle {
 				transform: Transform {
-					translation: vec3(0.0, 0.0, 0.0),
+					translation: vec3(position.x, position.y, 0.0),
 					..default()
 				},
 				sprite: Sprite {
@@ -130,13 +172,20 @@ fn setup(mut commands: Commands) {
 
 fn apply_player_control(
 	input: Res<Input<KeyCode>>,
-	_: Res<Time>,
+	mut commands: Commands,
 	mut query: Query<(
 		&mut Acceleration,
-		&PlayerControlled
+		&mut FireRate,
+		&Position,
+		&PlayerControlled,
 	)>,
 ) {
-	for (mut accel, player_controlled) in query.iter_mut() {
+	for (
+		mut accel,
+		mut fire_rate,
+		position,
+		player_controlled
+	) in query.iter_mut() {
 		if input.pressed(KeyCode::A) {
 			accel.vector.x = -player_controlled.speed;
 		} else if input.pressed(KeyCode::D) {
@@ -152,11 +201,46 @@ fn apply_player_control(
 		} else {
 			accel.vector.y = 0.0;
 		}
+
+		if fire_rate.remaining_ms > 0.0 {
+			return;
+		}
+
+		if input.pressed(KeyCode::Right) {
+			fire_rate.remaining_ms = fire_rate.ms_delay;
+			let bullet_position = position.vector;
+
+			commands.spawn(
+				BulletBundle {
+					self_destruct_on_timer: SelfDestructOnTimer,
+					velocity: Velocity {
+						vector: vec2(500.0, 0.0),
+					},
+					position: Position {
+						vector: bullet_position,
+					},
+					lifetime: Alarm {
+						remaining_ms: 500.0,
+					},
+					sprite_bundle: SpriteBundle {
+						transform: Transform {
+							translation: vec3(bullet_position.x, bullet_position.y, 0.0),
+							..default()
+						},
+						sprite: Sprite {
+							color: Color::rgb(0.9, 0.3, 0.3),
+							custom_size: Some(Vec2::new(10.0, 10.0)),
+							..default()
+						},
+						..default()
+					},
+				}
+			);
+		}
 	}
 }
 
 fn apply_acceleration(
-	_: Res<Input<KeyCode>>,
 	time: Res<Time>,
 	mut query: Query<(
 		&mut Velocity,
@@ -169,7 +253,6 @@ fn apply_acceleration(
 }
 
 fn apply_drag(
-	_: Res<Input<KeyCode>>,
 	time: Res<Time>,
 	mut query: Query<(
 		&mut Velocity,
@@ -183,16 +266,64 @@ fn apply_drag(
 }
 
 fn apply_velocity(
-	_: Res<Input<KeyCode>>,
 	time: Res<Time>,
 	mut query: Query<(
-		&mut Transform,
+		&mut Position,
 		&Velocity,
 	)>,
 ) {
-	for (mut transform, velocity) in query.iter_mut() {
-		transform.translation.x += time.delta_seconds() * velocity.vector.x;
-		transform.translation.y += time.delta_seconds() * velocity.vector.y;
+	for (mut position, velocity) in query.iter_mut() {
+		position.vector.x += time.delta_seconds() * velocity.vector.x;
+		position.vector.y += time.delta_seconds() * velocity.vector.y;
+	}
+}
+
+fn update_moving_sprites (
+	mut query: Query<
+		(
+			&mut Transform,
+			&Position,
+		),
+		With<Velocity>
+	>,
+) {
+	for (mut transform, position) in query.iter_mut() {
+		transform.translation.x = position.vector.x;
+		transform.translation.y = position.vector.y;
+	}
+}
+
+fn update_timer(
+	time: Res<Time>,
+	mut query: Query<&mut Alarm>,
+) {
+	for mut alarm in &mut query {
+		alarm.remaining_ms -= time.delta_seconds() * 1000.0;
+	}
+}
+
+fn process_fire_rate(
+	time: Res<Time>,
+	mut query: Query<&mut FireRate>,
+) {
+	for mut fire_rate in &mut query {
+		fire_rate.remaining_ms -= time.delta_seconds() * 1000.0;
+	}
+}
+
+fn process_self_destruct_on_timer(
+	mut commands: Commands,
+	query: Query<
+		(Entity, &Alarm),
+		With<SelfDestructOnTimer>,
+	>,
+) {
+	for (entity, alarm) in query.iter() {
+		if alarm.remaining_ms > 0.0 {
+			return;
+		}
+
+		commands.entity(entity).despawn();
 	}
 }
 
