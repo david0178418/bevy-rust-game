@@ -20,7 +20,7 @@ fn main() {
                 primary_window: Some(Window {
                     title: "Some Title".into(),
                     resolution: (1024., 728.).into(),
-                    present_mode: PresentMode::AutoNoVsync,
+                    present_mode: PresentMode::AutoVsync,
                     // Tells wasm to resize the window according to the available canvas
                     fit_canvas_to_parent: true,
                     // Tells wasm not to override default event handling, like F5, Ctrl+R etc.
@@ -85,36 +85,47 @@ struct Drag {
 	value: f32,
 }
 
+#[derive(Bundle)]
+struct PlayerBundle {
+	acceleration: Acceleration,
+	velocity: Velocity,
+	drag: Drag,
+	player_controlled: PlayerControlled,
+	sprite_bundle: SpriteBundle,
+}
+
 fn setup(mut commands: Commands) {
 	commands.spawn(Camera2dBundle::default());
 
 	// Spawn player
-	commands.spawn((
-		SpriteBundle {
-			transform: Transform {
-				translation: vec3(0.0, 0.0, 0.0),
+	commands.spawn(
+		PlayerBundle {
+			acceleration: Acceleration {
+				vector: vec2(0.0, 0.0),
+			},
+			velocity: Velocity {
+				vector: vec2(0.0, 0.0),
+			},
+			drag: Drag {
+				value: 3.0,
+			},
+			player_controlled: PlayerControlled {
+				speed: 1300.0,
+			},
+			sprite_bundle: SpriteBundle {
+				transform: Transform {
+					translation: vec3(0.0, 0.0, 0.0),
+					..default()
+				},
+				sprite: Sprite {
+					color: Color::rgb(0.3, 0.3, 0.9),
+					custom_size: Some(Vec2::new(40.0, 40.0)),
+					..default()
+				},
 				..default()
 			},
-			sprite: Sprite {
-				color: Color::rgb(0.3, 0.3, 0.9),
-				custom_size: Some(Vec2::new(40.0, 40.0)),
-				..default()
-			},
-			..default()
 		},
-		Acceleration {
-			vector: vec2(0.0, 0.0),
-		},
-		Velocity {
-			vector: vec2(0.0, 0.0),
-		},
-		Drag {
-			value: 3.0,
-		},
-		PlayerControlled {
-			speed: 1300.0,
-		},
-	));
+	);
 }
 
 fn apply_player_control(
