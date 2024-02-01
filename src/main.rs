@@ -96,7 +96,7 @@ fn setup(mut commands: Commands) {
 				..default()
 			},
 			sprite: Sprite {
-				color: Color::rgb(0.3, 0.3, 0.7),
+				color: Color::rgb(0.3, 0.3, 0.9),
 				custom_size: Some(Vec2::new(40.0, 40.0)),
 				..default()
 			},
@@ -184,3 +184,4 @@ fn apply_velocity(
 		transform.translation.y += time.delta_seconds() * velocity.vector.y;
 	}
 }
+
