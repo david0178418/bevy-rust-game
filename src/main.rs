@@ -43,9 +43,11 @@ fn main() {
 			// LogDiagnosticsPlugin::default(),
 			// FrameTimeDiagnosticsPlugin,
 		))
-		.add_plugins(MovementPlugin)
-		.add_plugins(BulletPlugin)
-		.add_plugins(PlayerPlugin)
+		.add_plugins((
+			MovementPlugin,
+			BulletPlugin,
+			PlayerPlugin
+		))
 		.add_systems(Startup, setup)
 		.add_systems(Update, (
 			bevy::window::close_on_esc,
