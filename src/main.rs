@@ -49,7 +49,6 @@ fn main() {
 			process_self_destruct_on_timer,
 		))
 		.add_systems(FixedUpdate, (
-			update_timer,
 			process_fire_rate,
 			apply_acceleration,
 			apply_velocity,
@@ -101,12 +100,9 @@ struct FireRate {
 }
 
 #[derive(Component)]
-struct Alarm {
+struct SelfDestruct {
 	timer: Timer,
 }
-
-#[derive(Component)]
-struct SelfDestructOnTimer;
 
 #[derive(Bundle)]
 struct PlayerBundle {
@@ -123,8 +119,7 @@ struct PlayerBundle {
 struct BulletBundle {
 	velocity: Velocity,
 	position: Position,
-	self_destruct_on_timer: SelfDestructOnTimer,
-	lifetime: Alarm,
+	self_destruct: SelfDestruct,
 	sprite_bundle: SpriteBundle,
 }
 
@@ -217,7 +212,9 @@ fn apply_player_control(
 
 			commands.spawn(
 				BulletBundle {
-					self_destruct_on_timer: SelfDestructOnTimer,
+					self_destruct: SelfDestruct {
+						timer: Timer::from_seconds(0.4, TimerMode::Once),
+					},
 					velocity: Velocity {
 						vector: vec2(
 							750.0 + velocity.vector.x + velocity_variable,
@@ -226,9 +223,6 @@ fn apply_player_control(
 					},
 					position: Position {
 						vector: bullet_position,
-					},
-					lifetime: Alarm {
-						timer: Timer::from_seconds(0.4, TimerMode::Once),
 					},
 					sprite_bundle: SpriteBundle {
 						transform: Transform {
@@ -301,15 +295,6 @@ fn update_moving_sprites (
 	}
 }
 
-fn update_timer(
-	time: Res<Time>,
-	mut query: Query<&mut Alarm>,
-) {
-	for mut alarm in &mut query {
-		alarm.timer.tick(time.delta());
-	}
-}
-
 fn process_fire_rate(
 	time: Res<Time>,
 	mut query: Query<&mut FireRate>,
@@ -321,17 +306,15 @@ fn process_fire_rate(
 
 fn process_self_destruct_on_timer(
 	mut commands: Commands,
-	query: Query<
-		(Entity, &Alarm),
-		With<SelfDestructOnTimer>,
-	>,
+	time: Res<Time>,
+	mut query: Query<(Entity, &mut SelfDestruct)>,
 ) {
-	for (entity, alarm) in query.iter() {
-		if !alarm.timer.finished() {
-			return;
-		}
+	for (entity, mut self_destruct) in query.iter_mut() {
+		self_destruct.timer.tick(time.delta());
 
-		commands.entity(entity).despawn();
+		if self_destruct.timer.finished() {
+			commands.entity(entity).despawn();
+		}
 	}
 }
 
