@@ -102,7 +102,7 @@ struct FireRate {
 
 #[derive(Component)]
 struct Alarm {
-	remaining_ms: f32,
+	timer: Timer,
 }
 
 #[derive(Component)]
@@ -228,7 +228,7 @@ fn apply_player_control(
 						vector: bullet_position,
 					},
 					lifetime: Alarm {
-						remaining_ms: 400.0,
+						timer: Timer::from_seconds(0.4, TimerMode::Once),
 					},
 					sprite_bundle: SpriteBundle {
 						transform: Transform {
@@ -306,7 +306,7 @@ fn update_timer(
 	mut query: Query<&mut Alarm>,
 ) {
 	for mut alarm in &mut query {
-		alarm.remaining_ms -= time.delta_seconds() * 1000.0;
+		alarm.timer.tick(time.delta());
 	}
 }
 
@@ -327,7 +327,7 @@ fn process_self_destruct_on_timer(
 	>,
 ) {
 	for (entity, alarm) in query.iter() {
-		if alarm.remaining_ms > 0.0 {
+		if !alarm.timer.finished() {
 			return;
 		}
 
