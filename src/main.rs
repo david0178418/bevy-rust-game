@@ -1,22 +1,20 @@
-mod movement;
+use bevy::prelude::*;
+
 mod bullet;
+mod movement;
 mod player;
 
 use bevy::{
-	prelude::*,
 	core::FrameCount,
-	window::{
-		PresentMode,
-		WindowTheme,
-	}
+	window::{PresentMode, WindowTheme},
 };
-use movement::MovementPlugin;
 use bullet::BulletPlugin;
+use movement::MovementPlugin;
 use player::PlayerPlugin;
 
 fn main() {
 	App::new()
-		.insert_resource(ClearColor(Color::rgb(0.2, 0.2, 0.2)))
+		.insert_resource(ClearColor(Color::srgb(0.2, 0.2, 0.2)))
 		.add_plugins((
 			DefaultPlugins.set(WindowPlugin {
 				primary_window: Some(Window {
@@ -24,7 +22,7 @@ fn main() {
 					resolution: (1024., 728.).into(),
 					present_mode: PresentMode::AutoVsync,
 					// Tells wasm to resize the window according to the available canvas
-					fit_canvas_to_parent: true,
+					// fit_canvas_to_parent: true,
 					// Tells wasm not to override default event handling, like F5, Ctrl+R etc.
 					prevent_default_event_handling: false,
 					window_theme: Some(WindowTheme::Dark),
@@ -43,16 +41,10 @@ fn main() {
 			// LogDiagnosticsPlugin::default(),
 			// FrameTimeDiagnosticsPlugin,
 		))
-		.add_plugins((
-			MovementPlugin,
-			BulletPlugin,
-			PlayerPlugin
-		))
+		.add_plugins(bevy_dev_tools::DevToolsPlugin)
+		.add_plugins((MovementPlugin, BulletPlugin, PlayerPlugin))
 		.add_systems(Startup, setup)
-		.add_systems(Update, (
-			bevy::window::close_on_esc,
-			make_visible,
-		))
+		.add_systems(Update, make_visible)
 		.run();
 }
 

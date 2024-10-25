@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::movement::{Position, Velocity};
+use bevy::prelude::*;
 
 #[derive(Component)]
 pub struct SelfDestruct {
@@ -32,8 +32,6 @@ pub struct BulletPlugin;
 
 impl Plugin for BulletPlugin {
 	fn build(&self, app: &mut App) {
-		app.add_systems(Update, (
-			process_self_destruct,
-		));
+		app.add_systems(Update, (process_self_destruct,));
 	}
 }
