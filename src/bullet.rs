@@ -1,9 +1,12 @@
 use crate::movement::{Position, Velocity};
 use bevy::prelude::*;
 
-#[derive(Component)]
-pub struct SelfDestruct {
-	pub timer: Timer,
+pub struct BulletPlugin;
+
+impl Plugin for BulletPlugin {
+	fn build(&self, app: &mut App) {
+		app.add_systems(Update, (process_self_destruct,));
+	}
 }
 
 #[derive(Bundle)]
@@ -12,6 +15,11 @@ pub struct BulletBundle {
 	pub position: Position,
 	pub self_destruct: SelfDestruct,
 	pub sprite_bundle: SpriteBundle,
+}
+
+#[derive(Component)]
+pub struct SelfDestruct {
+	pub timer: Timer,
 }
 
 fn process_self_destruct(
@@ -25,13 +33,5 @@ fn process_self_destruct(
 		if self_destruct.timer.finished() {
 			commands.entity(entity).despawn();
 		}
-	}
-}
-
-pub struct BulletPlugin;
-
-impl Plugin for BulletPlugin {
-	fn build(&self, app: &mut App) {
-		app.add_systems(Update, (process_self_destruct,));
 	}
 }

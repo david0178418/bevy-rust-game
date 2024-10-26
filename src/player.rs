@@ -1,20 +1,18 @@
 use crate::bullet::{BulletBundle, SelfDestruct};
 use crate::movement::{Acceleration, Drag, Position, Velocity};
-
 use bevy::{
 	math::{vec2, vec3},
 	prelude::*,
 };
 use rand::random;
 
-#[derive(Component)]
-struct PlayerControlled {
-	speed: f32,
-}
+pub struct PlayerPlugin;
 
-#[derive(Component)]
-struct FireRate {
-	timer: Timer,
+impl Plugin for PlayerPlugin {
+	fn build(&self, app: &mut App) {
+		app.add_systems(Startup, setup)
+			.add_systems(Update, apply_player_control);
+	}
 }
 
 #[derive(Bundle)]
@@ -26,6 +24,16 @@ struct PlayerBundle {
 	drag: Drag,
 	player_controlled: PlayerControlled,
 	sprite_bundle: SpriteBundle,
+}
+
+#[derive(Component)]
+struct PlayerControlled {
+	speed: f32,
+}
+
+#[derive(Component)]
+struct FireRate {
+	timer: Timer,
 }
 
 fn setup(mut commands: Commands) {
@@ -129,14 +137,5 @@ fn apply_player_control(
 				},
 			});
 		}
-	}
-}
-
-pub struct PlayerPlugin;
-
-impl Plugin for PlayerPlugin {
-	fn build(&self, app: &mut App) {
-		app.add_systems(Startup, setup)
-			.add_systems(Update, apply_player_control);
 	}
 }
