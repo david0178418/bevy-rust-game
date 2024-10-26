@@ -43,7 +43,7 @@ fn main() {
 		))
 		.add_plugins(bevy_dev_tools::DevToolsPlugin)
 		.add_plugins((MovementPlugin, BulletPlugin, PlayerPlugin))
-		.add_systems(Startup, setup)
+		.add_systems(Startup, setup_camera)
 		.add_systems(Update, make_visible)
 		.run();
 }
@@ -58,6 +58,6 @@ fn make_visible(mut window: Query<&mut Window>, frames: Res<FrameCount>) {
 	}
 }
 
-fn setup(mut commands: Commands) {
+fn setup_camera(mut commands: Commands) {
 	commands.spawn(Camera2dBundle::default());
 }
