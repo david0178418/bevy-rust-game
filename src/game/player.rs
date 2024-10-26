@@ -1,5 +1,7 @@
-use crate::bullet::{BulletBundle, SelfDestruct};
-use crate::movement::{Acceleration, Drag, Position, Velocity};
+use super::{
+	bullet::{BulletBundle, SelfDestruct},
+	movement::{Acceleration, Drag, Position, Velocity},
+};
 use bevy::{
 	math::{vec2, vec3},
 	prelude::*,

@@ -1,16 +1,11 @@
-use bevy::prelude::*;
-
-mod bullet;
-mod movement;
-mod player;
-
 use bevy::{
 	core::FrameCount,
-	window::{PresentMode, WindowTheme},
+	prelude::*,
+	window::{EnabledButtons, PresentMode, WindowTheme},
 };
-use bullet::BulletPlugin;
-use movement::MovementPlugin;
-use player::PlayerPlugin;
+use game::GamePlugin;
+
+mod game;
 
 fn main() {
 	App::new()
@@ -26,7 +21,7 @@ fn main() {
 					// Tells wasm not to override default event handling, like F5, Ctrl+R etc.
 					prevent_default_event_handling: false,
 					window_theme: Some(WindowTheme::Dark),
-					enabled_buttons: bevy::window::EnabledButtons {
+					enabled_buttons: EnabledButtons {
 						maximize: false,
 						..Default::default()
 					},
@@ -42,7 +37,7 @@ fn main() {
 			// FrameTimeDiagnosticsPlugin,
 		))
 		.add_plugins(bevy_dev_tools::DevToolsPlugin)
-		.add_plugins((MovementPlugin, BulletPlugin, PlayerPlugin))
+		.add_plugins(GamePlugin)
 		.add_systems(Startup, setup_camera)
 		.add_systems(Update, make_visible)
 		.run();

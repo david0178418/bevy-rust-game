@@ -1,5 +1,6 @@
-use crate::movement::{Position, Velocity};
 use bevy::prelude::*;
+
+use super::movement::{Position, Velocity};
 
 pub struct BulletPlugin;
 
