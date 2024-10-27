@@ -38,7 +38,6 @@ fn main() {
 		))
 		.add_plugins(bevy_dev_tools::DevToolsPlugin)
 		.add_plugins(GamePlugin)
-		.add_systems(Startup, setup_camera)
 		.add_systems(Update, make_visible)
 		.run();
 }
@@ -51,8 +50,4 @@ fn make_visible(mut window: Query<&mut Window>, frames: Res<FrameCount>) {
 		// It will work, but it will have one white frame before it starts rendering
 		window.single_mut().visible = true;
 	}
-}
-
-fn setup_camera(mut commands: Commands) {
-	commands.spawn(Camera2dBundle::default());
 }

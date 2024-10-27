@@ -1,5 +1,6 @@
 use super::{
 	bullet::{BulletBundle, SelfDestruct},
+	camera::CameraTarget,
 	movement::{Acceleration, Drag, Position, Velocity},
 };
 use bevy::{
@@ -29,7 +30,7 @@ struct PlayerBundle {
 }
 
 #[derive(Component)]
-struct PlayerControlled {
+pub struct PlayerControlled {
 	speed: f32,
 }
 
@@ -42,32 +43,35 @@ fn setup(mut commands: Commands) {
 	let position = vec2(0.0, 0.0);
 
 	// Spawn player
-	commands.spawn(PlayerBundle {
-		fire_rate: FireRate {
-			timer: Timer::from_seconds(0.1, TimerMode::Once),
-		},
-		acceleration: Acceleration {
-			vector: vec2(0.0, 0.0),
-		},
-		velocity: Velocity {
-			vector: vec2(0.0, 0.0),
-		},
-		position: Position { vector: position },
-		drag: Drag { value: 3.0 },
-		player_controlled: PlayerControlled { speed: 1300.0 },
-		sprite_bundle: SpriteBundle {
-			transform: Transform {
-				translation: vec3(position.x, position.y, 0.0),
+	commands.spawn((
+		PlayerBundle {
+			fire_rate: FireRate {
+				timer: Timer::from_seconds(0.1, TimerMode::Once),
+			},
+			acceleration: Acceleration {
+				vector: vec2(0.0, 0.0),
+			},
+			velocity: Velocity {
+				vector: vec2(0.0, 0.0),
+			},
+			position: Position { vector: position },
+			drag: Drag { value: 3.0 },
+			player_controlled: PlayerControlled { speed: 1300.0 },
+			sprite_bundle: SpriteBundle {
+				transform: Transform {
+					translation: vec3(position.x, position.y, 0.0),
+					..default()
+				},
+				sprite: Sprite {
+					color: Color::srgb(0.3, 0.3, 1.0),
+					custom_size: Some(Vec2::new(40.0, 40.0)),
+					..default()
+				},
 				..default()
 			},
-			sprite: Sprite {
-				color: Color::srgb(0.3, 0.3, 1.0),
-				custom_size: Some(Vec2::new(40.0, 40.0)),
-				..default()
-			},
-			..default()
 		},
-	});
+		CameraTarget,
+	));
 }
 
 fn apply_player_control(
