@@ -48,15 +48,15 @@ fn update_camera_position(
 }
 
 fn update_camera_target(
-	mut camera_target: Query<(Entity, &CameraTarget)>,
-	mut next_camera_target: Query<(Entity, &NextCameraTarget)>,
+	mut camera_target: Query<Entity, With<CameraTarget>>,
+	mut next_camera_target: Query<Entity, With<NextCameraTarget>>,
 	mut commands: Commands,
 ) {
-	let Ok((camera_target, _)) = camera_target.get_single_mut() else {
+	let Ok(camera_target) = camera_target.get_single_mut() else {
 		return;
 	};
 
-	let Ok((next_camera_target, _)) = next_camera_target.get_single_mut() else {
+	let Ok(next_camera_target) = next_camera_target.get_single_mut() else {
 		return;
 	};
 
