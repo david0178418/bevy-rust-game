@@ -11,7 +11,8 @@ impl Plugin for MovementPlugin {
 				apply_velocity,
 				apply_drag,
 				update_moving_sprites,
-			),
+			)
+				.chain(),
 		);
 	}
 }
