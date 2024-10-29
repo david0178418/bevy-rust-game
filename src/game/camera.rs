@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, window::WindowResized};
 
 pub struct CameraPlugin;
 
@@ -6,7 +6,12 @@ impl Plugin for CameraPlugin {
 	fn build(&self, app: &mut App) {
 		app.add_systems(Startup, setup).add_systems(
 			Update,
-			(update_camera_target, update_camera_position).chain(),
+			(
+				update_camera_target,
+				update_camera_position,
+				on_window_resized,
+			)
+				.chain(),
 		);
 	}
 }
@@ -65,4 +70,20 @@ fn update_camera_target(
 		.entity(next_camera_target)
 		.remove::<NextCameraTarget>()
 		.insert(CameraTarget);
+}
+
+fn on_window_resized(
+	mut ev_window_resized: EventReader<WindowResized>,
+	mut camera_transform_query: Query<&mut Transform, With<Camera2d>>,
+) {
+	for ev in ev_window_resized.read() {
+		let scale_factor = 1920.0 / ev.width;
+		let mut camera_transform = camera_transform_query.single_mut();
+
+		camera_transform.scale = Vec3 {
+			x: scale_factor,
+			y: scale_factor,
+			z: 1.0,
+		};
+	}
 }

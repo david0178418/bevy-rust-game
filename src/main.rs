@@ -1,26 +1,38 @@
+mod game;
+
 use bevy::{
 	core::FrameCount,
 	prelude::*,
-	window::{EnabledButtons, PresentMode, WindowTheme},
+	window::{EnabledButtons, PresentMode, WindowResolution, WindowTheme},
 };
 use game::GamePlugin;
 
-mod game;
+const BASE_RESOLUTION_WIDTH: f32 = 1920.0;
+const BASE_RESOLUTION_HEIGHT: f32 = 1080.0;
+const INITIAL_SCREEN_RATIO: f32 = 15.0 / 8.0;
 
 fn main() {
+	println!(
+		"format {} arguments",
+		BASE_RESOLUTION_WIDTH * INITIAL_SCREEN_RATIO
+	);
 	App::new()
 		.insert_resource(ClearColor(Color::srgb(0.2, 0.2, 0.2)))
 		.add_plugins((
 			DefaultPlugins.set(WindowPlugin {
 				primary_window: Some(Window {
 					title: "Some Title".into(),
-					resolution: (1024., 728.).into(),
+					resolution: WindowResolution::new(
+						BASE_RESOLUTION_WIDTH / INITIAL_SCREEN_RATIO,
+						BASE_RESOLUTION_HEIGHT / INITIAL_SCREEN_RATIO,
+					),
 					present_mode: PresentMode::AutoVsync,
 					// Tells wasm to resize the window according to the available canvas
 					// fit_canvas_to_parent: true,
 					// Tells wasm not to override default event handling, like F5, Ctrl+R etc.
 					prevent_default_event_handling: false,
 					window_theme: Some(WindowTheme::Dark),
+					resizable: true,
 					enabled_buttons: EnabledButtons {
 						maximize: false,
 						..Default::default()
