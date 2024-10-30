@@ -1,4 +1,7 @@
-use super::movement::{Position, Velocity};
+use super::{
+	health::Destructable,
+	movement::{Position, Velocity},
+};
 use bevy::prelude::*;
 
 pub struct EnemyPlugin;
@@ -13,6 +16,7 @@ impl Plugin for EnemyPlugin {
 pub struct EnemyBundle {
 	pub velocity: Velocity,
 	pub position: Position,
+	pub destructable: Destructable,
 	pub sprite_bundle: SpriteBundle,
 }
 
@@ -24,6 +28,7 @@ fn initialize_enemy(mut commands: Commands) {
 		position: Position {
 			vector: Vec2 { x: 200.0, y: 200.0 },
 		},
+		destructable: Destructable { health: 100 },
 		sprite_bundle: SpriteBundle {
 			transform: Transform {
 				translation: Vec3 {

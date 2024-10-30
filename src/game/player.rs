@@ -1,6 +1,7 @@
 use super::{
 	bullet::{BulletBundle, SelfDestruct},
 	camera::CameraTarget,
+	health::Destructable,
 	movement::{Acceleration, Drag, Position, Velocity},
 };
 use bevy::{
@@ -23,6 +24,7 @@ struct PlayerBundle {
 	acceleration: Acceleration,
 	velocity: Velocity,
 	position: Position,
+	destructable: Destructable,
 	fire_rate: FireRate,
 	drag: Drag,
 	player_controlled: PlayerControlled,
@@ -54,6 +56,7 @@ fn setup(mut commands: Commands) {
 			velocity: Velocity {
 				vector: vec2(0.0, 0.0),
 			},
+			destructable: Destructable { health: 100 },
 			position: Position { vector: position },
 			drag: Drag { value: 3.0 },
 			player_controlled: PlayerControlled { speed: 1300.0 },

@@ -1,6 +1,7 @@
 mod bullet;
 mod camera;
 mod enemy;
+mod health;
 mod movement;
 mod player;
 
@@ -8,6 +9,7 @@ use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use bullet::BulletPlugin;
 use camera::{CameraPlugin, CameraTarget, NextCameraTarget};
 use enemy::EnemyPlugin;
+use health::HealthPlugin;
 use movement::{MovementPlugin, Position};
 use player::PlayerPlugin;
 
@@ -21,6 +23,7 @@ impl Plugin for GamePlugin {
 			EnemyPlugin,
 			PlayerPlugin,
 			CameraPlugin,
+			HealthPlugin,
 		))
 		.add_systems(
 			Update,
