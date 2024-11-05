@@ -1,11 +1,11 @@
 use super::{
-	bullet::{BulletBundle, SelfDestruct},
+	bullet::{BulletBundle, Collider, PlayerAttack, SelfDestruct},
 	camera::CameraTarget,
 	health::Destructable,
 	movement::{Acceleration, Drag, Position, Velocity},
 };
 use bevy::{
-	math::{vec2, vec3},
+	math::{bounding::Aabb2d, vec2, vec3},
 	prelude::*,
 };
 use rand::random;
@@ -119,7 +119,13 @@ fn apply_player_control(
 			let velocity_variable = (random::<f32>() * 200.0) - 100.0;
 			let vertical_vector_variable = (random::<f32>() * 250.0) - 125.0;
 
+			let transform = Transform {
+				translation: vec3(bullet_position.x, bullet_position.y, 0.0),
+				..default()
+			};
+
 			commands.spawn(BulletBundle {
+				player_attack: PlayerAttack,
 				self_destruct: SelfDestruct {
 					timer: Timer::from_seconds(0.4, TimerMode::Once),
 				},
@@ -132,11 +138,11 @@ fn apply_player_control(
 				position: Position {
 					vector: bullet_position,
 				},
+				collider: Collider {
+					aabb: Aabb2d::new(Vec2::new(-5.0, -5.0), Vec2::new(5.0, 5.0)),
+				},
 				sprite_bundle: SpriteBundle {
-					transform: Transform {
-						translation: vec3(bullet_position.x, bullet_position.y, 0.0),
-						..default()
-					},
+					transform,
 					sprite: Sprite {
 						color: Color::srgb(0.9, 0.3, 0.3),
 						custom_size: Some(Vec2::new(10.0, 10.0)),

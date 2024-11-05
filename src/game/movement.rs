@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use super::bullet::Collider;
+
 pub struct MovementPlugin;
 
 impl Plugin for MovementPlugin {
@@ -11,6 +13,7 @@ impl Plugin for MovementPlugin {
 				apply_velocity,
 				apply_drag,
 				update_moving_sprites,
+				update_moving_colliders,
 			)
 				.chain(),
 		);
@@ -61,5 +64,17 @@ fn update_moving_sprites(mut query: Query<(&mut Transform, &Position), With<Velo
 	for (mut transform, position) in query.iter_mut() {
 		transform.translation.x = position.vector.x;
 		transform.translation.y = position.vector.y;
+	}
+}
+
+fn update_moving_colliders(mut query: Query<(&mut Collider, &Position, &Sprite), With<Velocity>>) {
+	for (mut collider, position, sprite) in query.iter_mut() {
+		let half_width = sprite.custom_size.unwrap().x / 2.0;
+		let half_height = sprite.custom_size.unwrap().x / 2.0;
+
+		collider.aabb.min.x = position.vector.x - half_width;
+		collider.aabb.min.y = position.vector.y - half_height;
+		collider.aabb.max.x = position.vector.x + half_width;
+		collider.aabb.max.y = position.vector.y + half_height;
 	}
 }
