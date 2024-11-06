@@ -8,7 +8,7 @@ mod player;
 use bevy::{input::common_conditions::input_just_pressed, prelude::*};
 use bullet::BulletPlugin;
 use camera::{CameraPlugin, CameraTarget, NextCameraTarget};
-use enemy::EnemyPlugin;
+use enemy::{EnemyPlugin, EnemySpawner};
 use health::HealthPlugin;
 use movement::{MovementPlugin, Position};
 use player::PlayerPlugin;
@@ -17,7 +17,11 @@ pub struct GamePlugin;
 
 impl Plugin for GamePlugin {
 	fn build(&self, app: &mut App) {
-		app.add_plugins((
+		app.insert_resource(EnemySpawner {
+			timer: Timer::from_seconds(2.0, TimerMode::Repeating),
+		})
+		// .insert_resource(rand::thread_rng())
+		.add_plugins((
 			BulletPlugin,
 			MovementPlugin,
 			EnemyPlugin,
